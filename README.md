@@ -2,7 +2,7 @@
 
 Role Selection: Students choose from 4 disciplines (Natural Resource, Geography, Forestry, Engineering), each with unique perspectives that shape how they view scenarios.
 
-5-Domain Journey: The game progresses through all five domains of the Duea et al. framework with realistic scenarios at each stage:
+5-Domain Journey: The game progresses through all five domains of the Duea et al. framework (Duea, S. R., Zimmerman, E. B., Vaughn, L. M., Dias, S., & Harris, J. (2022). A Guide to Selecting Participatory Research Methods Based on Project and Partnership Goals. Journal of Participatory Research Methods, 3(1). https://doi.org/10.35844/001c.32605) with realistic scenarios at each stage:
 
 Domain 1: Building trust with skeptical community members
 Domain 2: Balancing competing priorities and visions
