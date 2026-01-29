@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participatory Research Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        /* Start Screen */
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .role-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .role-card.selected {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .role-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .role-card .title {
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .domain-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .domain-1 { background: #f9f; color: #333; }
+        .domain-2 { background: #bbf; color: #333; }
+        .domain-3 { background: #bfb; color: #333; }
+        .domain-4 { background: #fdb; color: #333; }
+        .domain-5 { background: #dfd; color: #333; }
+
+        /* Scenario Display */
+        .scenario-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            color: #444;
+        }
+
+        .role-perspective {
+            background: #f0f4ff;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        /* Choice Buttons */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .choice-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .choice-btn .choice-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Outcome Display */
+        .outcome {
+            background: #fff9e6;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffa500;
+        }
+
+        .outcome h3 {
+            color: #e67e00;
+            margin-bottom: 10px;
+        }
+
+        /* Stats Display */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* Action Buttons */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        /* Results Screen */
+        .results {
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .score-label {
+            font-size: 0.4em;
+            margin-top: 5px;
+        }
+
+        .insights {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .insight-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .insight-item strong {
+            color: #667eea;
+        }
+
+        .discussion-prompt {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4caf50;
+        }
+
+        .discussion-prompt h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .role-selection {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="startScreen" class="game-card">
+            <h1>🎓 Participatory Research Simulator</h1>
+            <p class="subtitle">A role-playing game for understanding community-engaged research</p>
+            
+            <p style="margin-bottom: 20px;">Welcome! In this simulation, you'll navigate a real-world participatory research project. Your discipline shapes how you see challenges and opportunities.</p>
+            
+            <h3 style="margin-bottom: 15px; color: #667eea;">Choose Your Role:</h3>
+            <div class="role-selection" id="roleSelection">
+                <div class="role-card" data-role="natural-resource">
+                    <div class="icon">🌲</div>
+                    <div class="title">Natural Resource Specialist</div>
+                </div>
+                <div class="role-card" data-role="geography">
+                    <div class="icon">🗺️</div>
+                    <div class="title">Geographer</div>
+                </div>
+                <div class="role-card" data-role="forestry">
+                    <div class="icon">🌳</div>
+                    <div class="title">Forestry Expert</div>
+                </div>
+                <div class="role-card" data-role="engineering">
+                    <div class="icon">⚙️</div>
+                    <div class="title">Engineer</div>
+                </div>
+            </div>
+            
+            <button class="btn" id="startBtn" disabled>Start Simulation</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-card hidden">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 20%"></div>
+            </div>
+
+            <div class="stats" id="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Trust</div>
+                    <div class="stat-value" id="trustStat">50</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Impact</div>
+                    <div class="stat-value" id="impactStat">50</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Resources</div>
+                    <div class="stat-value" id="resourceStat">50</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Alignment</div>
+                    <div class="stat-value" id="alignmentStat">50</div>
+                </div>
+            </div>
+
+            <span class="domain-badge" id="domainBadge">Domain 1: Engagement & Capacity Building</span>
+
+            <div id="scenarioContainer">
+                <div class="scenario-text" id="scenarioText"></div>
+                <div class="role-perspective" id="rolePerspective"></div>
+                <div class="choices" id="choices"></div>
+            </div>
+
+            <div id="outcomeContainer" class="hidden">
+                <div class="outcome" id="outcomeText"></div>
+                <button class="btn" id="continueBtn">Continue</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="game-card hidden">
+            <h1>📊 Simulation Complete!</h1>
+            <p class="subtitle">Time to reflect and discuss</p>
+
+            <div class="score-circle" id="finalScore">
+                <div>85</div>
+                <div class="score-label">Overall Score</div>
+            </div>
+
+            <div class="insights" id="insightsList"></div>
+
+            <div class="discussion-prompt">
+                <h3>💬 Discussion Questions:</h3>
+                <ul id="discussionQuestions" style="margin-top: 10px; line-height: 1.8;"></ul>
+            </div>
+
+            <button class="btn" onclick="location.reload()">Play Again</button>
+            <button class="btn btn-secondary" id="viewPathBtn">View Your Journey</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            role: null,
+            currentScenario: 0,
+            trust: 50,
+            impact: 50,
+            resources: 50,
+            alignment: 50,
+            decisions: []
+        };
+
+        // Role-specific perspectives
+        const rolePerspectives = {
+            'natural-resource': {
+                name: 'Natural Resource Specialist',
+                icon: '🌲',
+                viewpoint: 'You focus on ecosystem services, sustainability, and long-term environmental impact.'
+            },
+            'geography': {
+                name: 'Geographer',
+                icon: '🗺️',
+                viewpoint: 'You emphasize spatial relationships, community mapping, and place-based knowledge.'
+            },
+            'forestry': {
+                name: 'Forestry Expert',
+                icon: '🌳',
+                viewpoint: 'You prioritize forest management practices, community forestry, and resource use.'
+            },
+            'engineering': {
+                name: 'Engineer',
+                icon: '⚙️',
+                viewpoint: 'You focus on technical solutions, infrastructure needs, and measurable outcomes.'
+            }
+        };
+
+        // Scenarios following the 5 domains
+        const scenarios = [
+            {
+                domain: 1,
+                domainName: 'Engagement & Capacity Building',
+                context: 'A rural community has experienced declining water quality due to upstream industrial activity. You\'re tasked with initiating a participatory research project.',
+                scenario: 'You\'re meeting community members for the first time. The local elder seems skeptical of "researchers from the university" and mentions previous studies that never benefited the community.',
+                perspectives: {
+                    'natural-resource': 'You see this as a chance to collect baseline water quality data while building relationships.',
+                    'geography': 'You recognize the importance of understanding territorial boundaries and community social structures.',
+                    'forestry': 'You note the relationship between forest cover and water systems in the watershed.',
+                    'engineering': 'You want to propose technical solutions but realize trust needs to be established first.'
+                },
+                choices: [
+                    {
+                        text: 'Share your credentials and expertise',
+                        label: 'A',
+                        outcome: 'The elder politely listens but remains distant. Other community members look uncomfortable. Trust is harder to build.',
+                        effects: { trust: -10, resources: 5, alignment: -5 }
+                    },
+                    {
+                        text: 'Ask them to share their knowledge and concerns first',
+                        label: 'B',
+                        outcome: 'The elder appreciates being heard. Stories emerge about water changes over decades. The room feels warmer.',
+                        effects: { trust: 15, alignment: 10, impact: 5 }
+                    },
+                    {
+                        text: 'Propose a community advisory board with decision-making power',
+                        label: 'C',
+                        outcome: 'This surprises them positively! A younger member says "Usually researchers just extract information." You\'ve set a collaborative tone.',
+                        effects: { trust: 20, alignment: 15, resources: -10 }
+                    }
+                ]
+            },
+            {
+                domain: 2,
+                domainName: 'Exploration & Visioning',
+                context: 'Trust is building. Now you need to define research questions together.',
+                scenario: 'During a planning workshop, different voices emerge: Youth want job opportunities. Elders prioritize cultural practices. A local teacher wants educational programs. Your funding focuses on "water quality monitoring."',
+                perspectives: {
+                    'natural-resource': 'You see connections between ecological health and all these concerns.',
+                    'geography': 'You understand these reflect different spatial scales and temporal perspectives.',
+                    'forestry': 'You think about sustainable livelihoods connected to healthy watersheds.',
+                    'engineering': 'You\'re concerned about scope creep but see the interconnections.'
+                },
+                choices: [
+                    {
+                        text: 'Focus on the funded water quality work - it\'s what you can deliver',
+                        label: 'A',
+                        outcome: 'Participation drops. The teacher stops attending. Youth look disengaged. You have a focused project but less community ownership.',
+                        effects: { resources: 10, alignment: -15, trust: -10, impact: -5 }
+                    },
+                    {
+                        text: 'Facilitate a visioning session to find common ground',
+                        label: 'B',
+                        outcome: 'Through dialogue, "clean water for future generations" emerges as a shared vision connecting all concerns. It takes time but builds consensus.',
+                        effects: { alignment: 20, trust: 10, resources: -15, impact: 10 }
+                    },
+                    {
+                        text: 'Design sub-projects addressing each group\'s interests',
+                        label: 'C',
+                        outcome: 'Everyone feels heard, but coordination becomes complex. You\'re stretched thin. Some initiatives are stronger than others.',
+                        effects: { alignment: 10, resources: -20, trust: 5, impact: 5 }
+                    }
+                ]
+            },
+            {
+                domain: 3,
+                domainName: 'Visual & Narrative Methods',
+                context: 'Research questions are defined. Now you\'re collecting data with the community.',
+                scenario: 'You want to document lived experiences with water quality changes. Community members have varying comfort with "data collection."',
+                perspectives: {
+                    'natural-resource': 'You value indigenous ecological knowledge alongside scientific measurements.',
+                    'geography': 'You see power in participatory mapping and spatial storytelling.',
+                    'forestry': 'You understand traditional resource management practices hold valuable information.',
+                    'engineering': 'You\'re wondering how to make qualitative data rigorous and usable.'
+                },
+                choices: [
+                    {
+                        text: 'Train community members to use standard scientific protocols',
+                        label: 'A',
+                        outcome: 'Some excel, others feel intimidated. You get consistent data but miss deeper stories. An elder stops participating, saying "this feels like being tested."',
+                        effects: { resources: 15, trust: -10, impact: 5, alignment: -5 }
+                    },
+                    {
+                        text: 'Use photovoice - community members photograph what matters to them',
+                        label: 'B',
+                        outcome: 'Powerful images emerge: children playing in streams, sacred sites, industrial runoff. Storytelling circles bring tears and solidarity. Data feels alive.',
+                        effects: { trust: 15, impact: 15, alignment: 10, resources: -5 }
+                    },
+                    {
+                        text: 'Combine: technical monitoring by interested members, oral histories from elders',
+                        label: 'C',
+                        outcome: 'The mix is rich but takes coordination. Youth learn from elders. Scientific and traditional knowledge begin informing each other.',
+                        effects: { trust: 10, impact: 10, resources: -15, alignment: 15 }
+                    }
+                ]
+            },
+            {
+                domain: 4,
+                domainName: 'Mobilization for Change',
+                context: 'You have compelling evidence of water quality issues. Time to act.',
+                scenario: 'Your data shows concerning contamination levels. The community wants action. The polluting company is a major employer. Local government is cautious.',
+                perspectives: {
+                    'natural-resource': 'You see regulatory pathways and restoration opportunities.',
+                    'geography': 'You understand the political ecology - power, space, and resistance.',
+                    'forestry': 'You think about community-based resource management alternatives.',
+                    'engineering': 'You can propose technical remediation but know politics matter.'
+                },
+                choices: [
+                    {
+                        text: 'Write an academic paper - peer review adds credibility',
+                        label: 'A',
+                        outcome: 'It takes 18 months to publish. By then, community momentum has faded. "Where were you when we needed you?" asks the elder.',
+                        effects: { resources: 5, impact: -15, trust: -20, alignment: -10 }
+                    },
+                    {
+                        text: 'Support the community in presenting findings to local government',
+                        label: 'B',
+                        outcome: 'Youth, elders, and you present together. Your technical expertise validates their experience. The mayor agrees to investigate. It\'s not solved but progress is visible.',
+                        effects: { impact: 20, trust: 15, alignment: 10, resources: -5 }
+                    },
+                    {
+                        text: 'Help community create a public awareness campaign',
+                        label: 'C',
+                        outcome: 'Social media, local news, community forums. Pressure builds. The company responds defensively but agrees to dialogue. You\'re now in a complex negotiation.',
+                        effects: { impact: 15, alignment: 15, trust: 10, resources: -10 }
+                    }
+                ]
+            },
+            {
+                domain: 5,
+                domainName: 'Evaluation & Reflection',
+                context: 'The project is ending. Time to assess what happened and what changed.',
+                scenario: 'Your university wants metrics: publications, citations, grant dollars. The community measures success differently: relationships built, youth engaged, respect shown.',
+                perspectives: {
+                    'natural-resource': 'You value both ecological outcomes and community capacity.',
+                    'geography': 'You see power in counter-mapping and community-defined indicators.',
+                    'forestry': 'You think about long-term stewardship and intergenerational knowledge transfer.',
+                    'engineering': 'You want measurable outcomes but recognize some impacts are intangible.'
+                },
+                choices: [
+                    {
+                        text: 'Focus on academic metrics - that\'s how your career is evaluated',
+                        label: 'A',
+                        outcome: 'You get publications but community members feel used. "Just like the others," someone says at the final gathering. The partnership ends coldly.',
+                        effects: { resources: 15, trust: -25, impact: 5, alignment: -20 }
+                    },
+                    {
+                        text: 'Co-create evaluation criteria with the community',
+                        label: 'B',
+                        outcome: 'Together you identify: trust levels, knowledge shared, youth involvement, policy changes. Both community and academic goals are honored. The partnership continues.',
+                        effects: { trust: 20, alignment: 20, impact: 15, resources: -5 }
+                    },
+                    {
+                        text: 'Facilitate a storytelling circle about the journey',
+                        label: 'C',
+                        outcome: 'Emotions flow. Someone says "You actually listened." Challenges are named alongside successes. You learn as much from this as any data analysis.',
+                        effects: { trust: 15, impact: 10, alignment: 15, resources: -10 }
+                    }
+                ]
+            }
+        ];
+
+        // Initialize role selection
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                gameState.role = this.dataset.role;
+                document.getElementById('startBtn').disabled = false;
+            });
+        });
+
+        // Start game
+        document.getElementById('startBtn').addEventListener('click', function() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            loadScenario();
+        });
+
+        // Load scenario
+        function loadScenario() {
+            const scenario = scenarios[gameState.currentScenario];
+            const progress = ((gameState.currentScenario + 1) / scenarios.length) * 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('domainBadge').textContent = `Domain ${scenario.domain}: ${scenario.domainName}`;
+            document.getElementById('domainBadge').className = `domain-badge domain-${scenario.domain}`;
+            
+            document.getElementById('scenarioText').innerHTML = `
+                <strong>Context:</strong> ${scenario.context}<br><br>
+                <strong>Situation:</strong> ${scenario.scenario}
+            `;
+            
+            const rolePerspective = scenario.perspectives[gameState.role];
+            const roleInfo = rolePerspectives[gameState.role];
+            document.getElementById('rolePerspective').innerHTML = `
+                <strong>${roleInfo.icon} Your ${roleInfo.name} perspective:</strong> ${rolePerspective}
+            `;
+            
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            
+            scenario.choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `
+                    <span class="choice-label">Choice ${choice.label}:</span>
+                    ${choice.text}
+                `;
+                btn.addEventListener('click', () => makeChoice(index));
+                choicesContainer.appendChild(btn);
+            });
+            
+            updateStats();
+        }
+
+        // Make choice
+        function makeChoice(choiceIndex) {
+            const scenario = scenarios[gameState.currentScenario];
+            const choice = scenario.choices[choiceIndex];
+            
+            // Apply effects
+            gameState.trust += choice.effects.trust || 0;
+            gameState.impact += choice.effects.impact || 0;
+            gameState.resources += choice.effects.resources || 0;
+            gameState.alignment += choice.effects.alignment || 0;
+            
+            // Clamp values
+            gameState.trust = Math.max(0, Math.min(100, gameState.trust));
+            gameState.impact = Math.max(0, Math.min(100, gameState.impact));
+            gameState.resources = Math.max(0, Math.min(100, gameState.resources));
+            gameState.alignment = Math.max(0, Math.min(100, gameState.alignment));
+            
+            // Record decision
+            gameState.decisions.push({
+                domain: scenario.domain,
+                choice: choice.label,
+                text: choice.text
+            });
+            
+            // Show outcome
+            document.getElementById('scenarioContainer').style.display = 'none';
+            document.getElementById('outcomeContainer').classList.remove('hidden');
+            document.getElementById('outcomeText').innerHTML = `
+                <h3>📋 Outcome of Choice ${choice.label}:</h3>
+                <p>${choice.outcome}</p>
+            `;
+            
+            updateStats();
+        }
+
+        // Continue to next scenario
+        document.getElementById('continueBtn').addEventListener('click', function() {
+            gameState.currentScenario++;
+            
+            if (gameState.currentScenario >= scenarios.length) {
+                showResults();
+            } else {
+                document.getElementById('scenarioContainer').style.display = 'block';
+                document.getElementById('outcomeContainer').classList.add('hidden');
+                loadScenario();
+            }
+        });
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('trustStat').textContent = Math.round(gameState.trust);
+            document.getElementById('impactStat').textContent = Math.round(gameState.impact);
+            document.getElementById('resourceStat').textContent = Math.round(gameState.resources);
+            document.getElementById('alignmentStat').textContent = Math.round(gameState.alignment);
+        }
+
+        // Show results
+        function showResults() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            const finalScore = Math.round((gameState.trust + gameState.impact + gameState.resources + gameState.alignment) / 4);
+            document.getElementById('finalScore').innerHTML = `
+                <div>${finalScore}</div>
+                <div class="score-label">Overall Score</div>
+            `;
+            
+            // Generate insights
+            const insights = generateInsights();
+            const insightsList = document.getElementById('insightsList');
+            insightsList.innerHTML = '<h3 style="margin-bottom: 15px;">🔍 Your Research Journey Insights:</h3>';
+            
+            insights.forEach(insight => {
+                const div = document.createElement('div');
+                div.className = 'insight-item';
+                div.innerHTML = `<strong>${insight.title}:</strong> ${insight.text}`;
+                insightsList.appendChild(div);
+            });
+            
+            // Discussion questions
+            const questions = generateDiscussionQuestions();
+            const questionsList = document.getElementById('discussionQuestions');
+            questionsList.innerHTML = '';
+            
+            questions.forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = q;
+                li.style.marginBottom = '10px';
+                questionsList.appendChild(li);
+            });
+        }
+
+        // Generate insights based on performance
+        function generateInsights() {
+            const insights = [];
+            const roleInfo = rolePerspectives[gameState.role];
+            
+            insights.push({
+                title: `${roleInfo.icon} Your Disciplinary Lens`,
+                text: `As a ${roleInfo.name}, ${roleInfo.viewpoint.toLowerCase()} How did this perspective shape your choices?`
+            });
+            
+            if (gameState.trust > 70) {
+                insights.push({
+                    title: '🤝 Domain 1: Strong Foundation',
+                    text: 'You invested in building trust and capacity. This created a solid foundation for participatory work, though it required significant time and resources.'
+                });
+            } else if (gameState.trust < 40) {
+                insights.push({
+                    title: '⚠️ Domain 1: Trust Challenges',
+                    text: 'Low trust scores suggest the partnership struggled. Remember: participatory research requires genuine power-sharing and patience.'
+                });
+            }
+            
+            if (gameState.alignment > 70) {
+                insights.push({
+                    title: '🎯 Domain 2: High Alignment',
+                    text: 'You successfully navigated the challenge of aligning research questions with community priorities. Co-creation takes time but builds ownership.'
+                });
+            }
+            
+            if (gameState.impact > 70) {
+                insights.push({
+                    title: '💪 Domain 4: Effective Mobilization',
+                    text: 'Your choices led to tangible action. You understood that research impact requires moving beyond publication to support community-driven change.'
+                });
+            } else if (gameState.impact < 40) {
+                insights.push({
+                    title: '📊 Domain 4: Limited Impact',
+                    text: 'Impact scores were low. Consider: Did academic timelines and metrics conflict with community needs for timely action?'
+                });
+            }
+            
+            if (gameState.resources < 40) {
+                insights.push({
+                    title: '⏰ Resource Intensity',
+                    text: 'You experienced the resource demands of authentic participatory research. This is a real challenge - it requires institutional support and flexible funding.'
+                });
+            }
+            
+            return insights;
+        }
+
+        // Generate discussion questions
+        function generateDiscussionQuestions() {
+            const questions = [
+                'How did your disciplinary background influence which choices felt "natural" to you? What blind spots might your discipline have?',
+                'Compare your results with classmates who chose different roles. What patterns emerge across disciplines?',
+                'The Duea et al. framework shows five domains. Which domain felt most challenging in this simulation? Why?',
+                'Reflect on the tension between academic metrics (publications, grants) and community-defined success. How do we navigate this in real research?',
+                'Where did you see the "feedback loop" from Domain 5 back to Domain 1? What would a second iteration of this project look like?',
+                'What are the ethical implications of extractive vs. participatory research approaches? Use specific scenario examples.',
+                'How might power dynamics play out differently with different community partners (e.g., Indigenous communities, urban neighborhoods, industry stakeholders)?'
+            ];
+            
+            return questions;
+        }
+
+        // View path functionality
+        document.getElementById('viewPathBtn').addEventListener('click', function() {
+            let pathHtml = '<h3 style="margin: 20px 0;">Your Decision Path:</h3>';
+            gameState.decisions.forEach(decision => {
+                pathHtml += `<div class="insight-item"><strong>Domain ${decision.domain} - Choice ${decision.choice}:</strong> ${decision.text}</div>`;
+            });
+            
+            const insightsList = document.getElementById('insightsList');
+            insightsList.innerHTML += pathHtml;
+            this.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
